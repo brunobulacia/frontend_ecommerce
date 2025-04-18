@@ -5,12 +5,20 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { AtSignIcon, MailIcon, UserIcon } from "lucide-react"
 import { useAuthStore } from "@/store/auth"
+import { useNavigate } from "react-router-dom"
 
 export function DashboardPage() {
   const profile = useAuthStore((state) => state.profile)
- 
+  const logout = useAuthStore((state) => state.logout)
+  const navigate = useNavigate()
+
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase()
+  }
+
+  const handleLogout = () => {
+    logout() 
+    navigate("/login") 
   }
 
   if (!profile) {
@@ -32,12 +40,12 @@ export function DashboardPage() {
           <div className="flex flex-col items-center space-y-4">
             <Avatar className="h-24 w-24 border-2 border-purple-100">
               <AvatarFallback className="bg-purple-600 text-white text-xl">
-                {getInitials(profile.first_name, profile.last_name)}
+                {getInitials(profile.nombre, profile.apellidos)}
               </AvatarFallback>
             </Avatar>
             <div className="text-center space-y-1">
               <CardTitle className="text-2xl font-bold">
-                {profile.first_name} {profile.last_name}
+                {profile.nombre} {profile.apellidos}
               </CardTitle>
               <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
                 Perfil de usuario
@@ -53,7 +61,7 @@ export function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Usuario</p>
-                <p className="font-medium">{profile.username}</p>
+                <p className="font-medium">{profile.nombre}</p>
               </div>
             </div>
 
@@ -62,8 +70,8 @@ export function DashboardPage() {
                 <MailIcon className="h-5 w-5 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium">{profile.email}</p>
+                <p className="text-sm text-gray-500">Correo</p>
+                <p className="font-medium">{profile.correo}</p>
               </div>
             </div>
 
@@ -74,12 +82,18 @@ export function DashboardPage() {
               <div>
                 <p className="text-sm text-gray-500">Nombre</p>
                 <p className="font-medium">
-                  {profile.first_name} {profile.last_name}
+                  {profile.nombre} {profile.apellidos}
                 </p>
               </div>
             </div>
           </div>
         </CardContent>
+        <div
+          onClick={handleLogout}
+          className="flex items-center justify-center p-4 bg-gray-50 rounded-b-lg hover:bg-gray-100 cursor-pointer"
+        >
+          <p className="text-sm">Cerrar sesión</p>
+        </div>
       </Card>
     </div>
   )

@@ -2,19 +2,19 @@ import {create} from "zustand";
 import { persist } from "zustand/middleware";
 import { registerRequest } from "@/api/auth";
 import { createUser } from "@/types/user";
-import { Profile } from "@/types/user";
+import { UserProfile } from "@/types/user";
 
 type State = {
   token: string;
   isAuth: boolean;
   errors: any;
-  profile: Profile | null; // Agregamos el perfil al estado
+  profile: UserProfile | null; // Agregamos el perfil al estado
 };
 
 type Actions = {
   setToken: (token: string) => void;
-  setProfile: (profile: Profile) => void; // Setter para el perfil
-  getProfile: () => Profile | null; // Getter para el perfil
+  setProfile: (profile: UserProfile) => void; // Setter para el perfil
+  getProfile: () => UserProfile | null; // Getter para el perfil
   register: (user: createUser) => void;
   logout: () => void;
   cleanErrors: () => void;
@@ -32,7 +32,7 @@ export const useAuthStore = create(
                     token,
                     isAuth: !!token,
                 })),
-            setProfile: (profile: Profile) =>
+            setProfile: (profile: UserProfile) =>
                 set(() => ({
                     profile,
                 })), // Setter para actualizar el perfil

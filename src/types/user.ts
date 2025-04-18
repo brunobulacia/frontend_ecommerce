@@ -1,18 +1,20 @@
 export interface createUser {
-    user: string;
+    nombre: string;
     password: string;
-    fullName: string;
+    apellidos: string;
+    correo: string;
   }
 
 
 export interface UserLogin {
-    username: string;
+    // username: string;
     password: string;
+    correo: string;
 }
 
-export interface Profile {
-  username: string;
-  email: string;
-  first_name: string;
-  last_name: string;
+export interface UserProfile {
+  nombre: string;
+  correo: string;
+  apellidos: string;
+  rol : number;
 }

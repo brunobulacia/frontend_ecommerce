@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "../store/auth";
 
-const baseURL = "http://localhost:8000/usuarios/api/v1/";
+const baseURL = "http://localhost:8000/";
 const authApi = axios.create({
   baseURL,
   withCredentials: true,
@@ -10,7 +10,7 @@ const authApi = axios.create({
 authApi.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
-    config.headers.set('Authorization', `Bearer ${token}`);
+    config.headers.set('Authorization', `Token ${token}`);
   }
   return config;
 });
