@@ -1,13 +1,23 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
-interface props {
+interface authProps {
   isAllowed: boolean;
   children?: React.ReactNode;
 }
 
-function ProtectedRoute({ isAllowed, children }: props) {
+interface adminProps {
+  rol: number;
+  children?: React.ReactNode;
+}
+
+function ProtectedRoute({ isAllowed, children }: authProps) {
   if (!isAllowed) return <Navigate to="/login" />;
+  return children ? <>{children}</> : <Outlet />;
+}
+
+export function AdminRoute({ rol, children }: adminProps) {
+  if (rol != 2) return <Navigate to="/inicio" />;
   return children ? <>{children}</> : <Outlet />;
 }
 
