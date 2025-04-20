@@ -6,7 +6,6 @@ import { ProfilePage } from "./pages/ProfilePage.tsx";
 import { ProductsPage } from "./pages/ProductsPage.tsx";
 import { AdminPage, AdminLayout } from "./pages/Admin/AdminPage.tsx";
 import { AdminOrdersPage } from "./pages/Admin/Ordenes/AdmOrdenesPage.tsx";
-import { AdminUsersPage } from "./pages/Admin/Usuarios/AdmUsersPage.tsx";
 import ProtectedRoute, { AdminRoute } from "@/ProtectedRoute.tsx";
 import { useAuthStore } from "./store/auth.ts";
 
@@ -35,9 +34,10 @@ const App = () => {
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/admin/productos" element={<ABMProductos />} />
-              <Route path="/admin/pedidos" element={<AdminOrdersPage />} />
               <Route path="/admin/usuarios" element={<ABMUsuarios />} />
               <Route path="/admin/categorias" element={<ABMCategorias />} />
+
+              <Route path="/admin/pedidos" element={<AdminOrdersPage />} />
             </Route>
           </Route>
         </Routes>
