@@ -5,6 +5,7 @@ import { useState } from "react";
 import { loginRequest } from "@/api/auth";
 import { useAuthStore } from "@/store/auth";
 import type { UserLogin, UserProfile } from "@/types/user";
+import { UserDirection } from "@/types/direccion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,9 +47,43 @@ export function LoginPage() {
         correo: resLogin.data.user.correo,
         apellidos: resLogin.data.user.apellidos,
         rol: resLogin.data.user.rol,
+        id: resLogin.data.user.id,
       };
 
+      if (resLogin.data.user.direccion) {
+        const direccion: UserDirection = {
+          id: resLogin.data.user.direccion.id || "",
+          departamento: {
+            id: resLogin.data.user.direccion.departamento.id || "",
+            nombre: resLogin.data.user.direccion.departamento.nombre || "",
+          },
+          pais: resLogin.data.user.direccion.pais || "",
+          ciudad: resLogin.data.user.direccion.ciudad || "",
+          zona: resLogin.data.user.direccion.zona || "",
+          calle: resLogin.data.user.direccion.calle || "",
+          numero: resLogin.data.user.direccion.numero || "",
+          referencia: resLogin.data.user.direccion.referencia || "",
+        };
+        useAuthStore.setState({ directions: direccion });
+      } else {
+        const direccion: UserDirection = {
+          id: 0,
+          departamento: {
+            id: 0,
+            nombre: "",
+          },
+          pais: "",
+          ciudad: "",
+          zona: "",
+          calle: "",
+          numero: "",
+          referencia: "",
+        };
+        useAuthStore.setState({ directions: direccion });
+      }
+
       useAuthStore.setState({ profile });
+
       navigate("/inicio");
     } catch (error) {
       console.error("Login failed:", error);

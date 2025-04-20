@@ -5,13 +5,16 @@ import { Home, StoreLayout } from "./pages/HomePage.tsx";
 import { ProfilePage } from "./pages/ProfilePage.tsx";
 import { ProductsPage } from "./pages/ProductsPage.tsx";
 import { AdminPage, AdminLayout } from "./pages/Admin/AdminPage.tsx";
-import { AdminCategoriesPage } from "./pages/Admin/Categorias/AdmCategoriasPage.tsx";
-import { AdminProductsPage } from "./pages/Admin/Productos/AdmProductsPage.tsx";
 import { AdminOrdersPage } from "./pages/Admin/Ordenes/AdmOrdenesPage.tsx";
 import { AdminUsersPage } from "./pages/Admin/Usuarios/AdmUsersPage.tsx";
 import ProtectedRoute, { AdminRoute } from "@/ProtectedRoute.tsx";
 import { useAuthStore } from "./store/auth.ts";
 
+//ABMS
+import ABMCategorias from "./pages/Admin/Categorias/ABMCategorias.tsx";
+import ABMProductos from "./pages/Admin/Productos/ABMProductos.tsx";
+import ABMUsuarios from "./pages/Admin/Usuarios/ABMUsuarios.tsx";
+//APP
 const App = () => {
   const isAuth = useAuthStore((state) => state.isAuth);
   const rol = useAuthStore((state) => state.profile.rol);
@@ -31,13 +34,10 @@ const App = () => {
           <Route element={<AdminRoute rol={rol} />}>
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/productos" element={<AdminProductsPage />} />
+              <Route path="/admin/productos" element={<ABMProductos />} />
               <Route path="/admin/pedidos" element={<AdminOrdersPage />} />
-              <Route path="/admin/usuarios" element={<AdminUsersPage />} />
-              <Route
-                path="/admin/categorias"
-                element={<AdminCategoriesPage />}
-              />
+              <Route path="/admin/usuarios" element={<ABMUsuarios />} />
+              <Route path="/admin/categorias" element={<ABMCategorias />} />
             </Route>
           </Route>
         </Routes>

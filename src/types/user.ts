@@ -12,8 +12,15 @@ export interface UserLogin {
 }
 
 export interface UserProfile {
+  id: number;
   nombre: string;
   correo: string;
   apellidos: string;
   rol: number;
+}
+
+export interface updateUser {
+  nombre: string;
+  correo: string;
+  apellidos: string;
 }

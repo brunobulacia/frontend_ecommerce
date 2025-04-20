@@ -24,26 +24,34 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 // import { useToast } from "@/components/ui/use-toast"
 import { ProfileSidebar } from "@/components/profile-sidebar.tsx";
-import { UserCircle, Mail, MapPin } from "lucide-react";
+import { UserCircle, Mail } from "lucide-react";
 import { useAuthStore } from "@/store/auth.ts";
+import { updateUsuario, Usuarios } from "@/api/user";
+import { updateDireccionRequest } from "@/api/direccion";
+import { UpdateDireccionRequest } from "@/types/direccion";
+import { updateUser } from "@/types/user";
 
 const profileFormSchema = z.object({
-  nombre: z.string().min(2, "Name must be at least 2 characters."),
-  apellidos: z.string().min(10, "Phone number must be at least 10 digits"),
-  correo: z.string().email("Invalid email Direccion"),
+  nombre: z.string().min(2, "El nombre deberia ser de al menos 2 caracteres."),
+  apellidos: z.string().min(5, "Apellido minimo 5 caracteres."),
+  correo: z.string().email("El correo no es valido."),
 });
 
 const addressFormSchema = z.object({
-  Direccion: z.string().min(5, "Direccion is required"),
-  city: z.string().min(2, "City is required"),
-  state: z.string().min(2, "State is required"),
-  postalCode: z.string().min(3, "Postal code is required"),
+  pais: z.string().min(2, "Pais is required"),
+  departamento: z.string().min(2, "Departamento is required"),
+  ciudad: z.string().min(2, "Ciudad is required"),
+  zona: z.string().min(2, "Zona is required"),
+  calle: z.string().min(2, "Calle is required"),
+  numero: z.string().min(1, "Numero is required"),
+  referencia: z.string().optional(),
 });
 
 export function ProfilePage() {
   //   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const profile = useAuthStore((state) => state.profile);
+  const direccion = useAuthStore((state) => state.directions);
 
   const profileForm = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -57,37 +65,62 @@ export function ProfilePage() {
   const addressForm = useForm<z.infer<typeof addressFormSchema>>({
     resolver: zodResolver(addressFormSchema),
     defaultValues: {
-      Direccion: "123 Main St",
-      city: "New York",
-      state: "NY",
-      postalCode: "10001",
+      pais: direccion.pais,
+      departamento: direccion.departamento.nombre,
+      ciudad: direccion.ciudad,
+      zona: direccion.zona,
+      calle: direccion.calle,
+      numero: direccion.numero,
+      referencia: direccion.referencia,
     },
   });
 
-  function onProfileSubmit(values: z.infer<typeof profileFormSchema>) {
+  const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    /*    setTimeout(() => {
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully.",
-      })
-      setIsSubmitting(false)
-    }, 1000) */
-  }
+    try {
+      /* const updatedUser : Usuarios = {
+        nombre: values.nombre || profile.nombre,
+        apellidos: values.apellidos || profile.apellidos,
+        correo: values.correo || profile.correo,
+        id : 
+      }; */
 
-  function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
+      // console.log(updatedUser);
+      // const res = await updateUsuario(updatedUser);
+      // console.log(res.data);
+      // useAuthStore.setState({ profile: res.data });
+      setIsSubmitting(false);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setIsSubmitting(false);
+    }
+  };
+
+  async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
     setIsSubmitting(true);
 
-    // Simulate API call
-    /*  setTimeout(() => {
-      toast({
-        title: "Direccion updated",
-        description: "Your Direccion information has been updated successfully.",
-      })
-      setIsSubmitting(false)
-    }, 1000) */
+    try {
+      const updatedAddress: UpdateDireccionRequest = {
+        id_direccion: direccion.id,
+        pais: values.pais || direccion.pais,
+        departamento: values.departamento || direccion.departamento.nombre,
+        ciudad: values.ciudad || direccion.ciudad,
+        zona: values.zona || direccion.zona,
+        calle: values.calle || direccion.calle,
+        numero: values.numero || direccion.numero,
+        referencia: values.referencia || direccion.referencia,
+      };
+
+      console.log(updatedAddress);
+      const res = await updateDireccionRequest(updatedAddress);
+      console.log(res.data);
+      setIsSubmitting(false);
+      useAuthStore.setState({ directions: res.data });
+    } catch (error) {
+      console.error("Error updating address:", error);
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -209,7 +242,7 @@ export function ProfilePage() {
                         className="bg-slate-600 hover:bg-slate-500 text-white"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? "Saving..." : "Save Changes"}
+                        {isSubmitting ? "Guardando..." : "Guardar Cambios"}
                       </Button>
                     </form>
                   </Form>
@@ -233,38 +266,94 @@ export function ProfilePage() {
                       onSubmit={addressForm.handleSubmit(onAddressSubmit)}
                       className="space-y-6"
                     >
-                      <FormField
-                        control={addressForm.control}
-                        name="Direccion"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-slate-200">
-                              Direccion
-                            </FormLabel>
-                            <FormControl>
-                              <div className="relative">
-                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">
-                                  <MapPin className="h-4 w-4" />
-                                </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={addressForm.control}
+                          name="pais"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-200">
+                                Pais
+                              </FormLabel>
+                              <FormControl>
                                 <Input
-                                  className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
                                   {...field}
                                 />
-                              </div>
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressForm.control}
+                          name="departamento"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-200">
+                                Departamento
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                          control={addressForm.control}
+                          name="ciudad"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-200">
+                                Ciudad
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={addressForm.control}
+                          name="zona"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-slate-200">
+                                Zona
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <FormField
                           control={addressForm.control}
-                          name="city"
+                          name="calle"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-slate-200">
-                                City
+                                Calle
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -279,11 +368,11 @@ export function ProfilePage() {
 
                         <FormField
                           control={addressForm.control}
-                          name="state"
+                          name="numero"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-slate-200">
-                                State
+                                Numero
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -298,11 +387,11 @@ export function ProfilePage() {
 
                         <FormField
                           control={addressForm.control}
-                          name="postalCode"
+                          name="referencia"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-slate-200">
-                                Postal Code
+                                Referencia
                               </FormLabel>
                               <FormControl>
                                 <Input
@@ -321,7 +410,7 @@ export function ProfilePage() {
                         className="bg-slate-600 hover:bg-slate-500 text-white"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? "Saving..." : "Save Direccion"}
+                        {isSubmitting ? "Guardando..." : "Guardar Direccion"}
                       </Button>
                     </form>
                   </Form>
