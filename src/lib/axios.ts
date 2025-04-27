@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useAuthStore } from "../store/auth";
 
-const baseURL = "http://localhost:8000/";
-// const baseURL = "http://18.230.134.184:8000/";
+// const baseURL = "http://localhost:8000/";
+const baseURL = "http://18.230.187.169:8000/"; //AWS
 const authApi = axios.create({
   baseURL,
   withCredentials: true,
