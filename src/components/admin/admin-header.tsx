@@ -14,10 +14,8 @@ import {
 import {
   Menu,
   User,
-  Settings,
   LogOut,
   Package,
-  LayoutDashboard,
   ShoppingCart,
   Users,
   Tag,
@@ -50,7 +48,7 @@ export function AdminHeader() {
         >
           <div className="p-4 border-b border-slate-700">
             <Link
-              to="/admin"
+              to="/admin/productos"
               className="flex items-center gap-2 font-bold text-white"
             >
               <Package className="h-6 w-6" />
@@ -58,16 +56,6 @@ export function AdminHeader() {
             </Link>
           </div>
           <div className="flex flex-col gap-1 p-4">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-700"
-              asChild
-            >
-              <Link to="/admin">
-                <LayoutDashboard className="mr-2 h-4 w-4" />
-                Dashboard
-              </Link>
-            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-700"
@@ -166,7 +154,7 @@ export function AdminHeader() {
             </DropdownMenuItem>
             <DropdownMenuItem className="hover:bg-slate-700 cursor-pointer">
               <Link
-                to="/perfil/pedidos"
+                to="/pedidos"
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Package className="mr-2 h-4 w-4" />

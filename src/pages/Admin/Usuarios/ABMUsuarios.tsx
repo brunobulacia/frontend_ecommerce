@@ -41,6 +41,13 @@ import {
 } from "@/components/ui/dialog";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const columnHelper = createColumnHelper<Usuarios>();
 
@@ -78,17 +85,22 @@ export default function ABMUsuarios() {
     }),
     columnHelper.accessor("rol", {
       header: "Rol",
-      cell: (info) => (
-        <Badge
-          className={
-            info.getValue() === "Admin"
-              ? "bg-purple-800 hover:bg-purple-700 text-white"
-              : "bg-blue-800 hover:bg-blue-700 text-white"
-          }
-        >
-          {info.getValue()}
-        </Badge>
-      ),
+      cell: (info) => {
+        const roleText = info.getValue();
+        return (
+          <Badge
+            className={
+              roleText === "Administrador"
+                ? "bg-purple-800 hover:bg-purple-700 text-white"
+                : roleText === "Delivery"
+                ? "bg-blue-800 hover:bg-blue-700 text-white"
+                : "bg-green-800 hover:bg-green-700 text-white"
+            }
+          >
+            {roleText}
+          </Badge>
+        );
+      },
     }),
     columnHelper.accessor("correo", {
       header: "Correo",
@@ -168,7 +180,7 @@ export default function ABMUsuarios() {
   }, []);
 
   return (
-    <div className="p-6 min-h-screen bg-[#1a2035]">
+    <div className="p-6 min-h-screen">
       <Card className="max-w-5xl mx-auto border-slate-700 shadow-md rounded-xl overflow-hidden bg-[#1e2745]">
         <CardHeader className="bg-[#1e2745] border-b border-slate-700 pb-4">
           <div className="flex justify-between items-center">
@@ -345,8 +357,13 @@ export function DialogCrearUsuario({ onClose }: DialogCrearProps) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<Usuarios>();
+
+  // Para manejar el select con react-hook-form
+  const watchRol = watch("rol");
 
   const onSubmit: SubmitHandler<Usuarios> = async (data) => {
     try {
@@ -372,7 +389,7 @@ export function DialogCrearUsuario({ onClose }: DialogCrearProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div>
-            <Label htmlFor="nombre" className="text-slate-300">
+            <Label htmlFor="nombre" className="text-slate-300 mb-2">
               Nombre
             </Label>
             <Input
@@ -385,7 +402,7 @@ export function DialogCrearUsuario({ onClose }: DialogCrearProps) {
             )}
           </div>
           <div>
-            <Label htmlFor="apellidos" className="text-slate-300">
+            <Label htmlFor="apellidos" className="text-slate-300 mb-2">
               Apellidos
             </Label>
             <Input
@@ -403,10 +420,22 @@ export function DialogCrearUsuario({ onClose }: DialogCrearProps) {
             <Label htmlFor="rol" className="text-slate-300">
               Rol
             </Label>
-            <Input
-              id="rol"
+            <Select
+              onValueChange={(value) => setValue("rol", value)}
+              defaultValue={watchRol}
+            >
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500">
+                <SelectValue placeholder="Seleccione un rol" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
+                <SelectItem value="Administrador">Administrador</SelectItem>
+                <SelectItem value="Delivery">Delivery</SelectItem>
+                <SelectItem value="Cliente">Cliente</SelectItem>
+              </SelectContent>
+            </Select>
+            <input
+              type="hidden"
               {...register("rol", { required: "El rol es obligatorio" })}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
             />
             {errors.rol && (
               <p className="text-red-400 text-sm">{errors.rol.message}</p>
@@ -436,13 +465,19 @@ export function EditUsuarioDialog({ usuario, onClose }: DialogEditProps) {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
+    setValue,
+    watch,
   } = useForm<Usuarios>({
     defaultValues: {
       nombre: usuario.nombre,
       apellidos: usuario.apellidos,
       rol: usuario.rol,
+      correo: usuario.correo,
     },
   });
+
+  // Para manejar el select con react-hook-form
+  const watchRol = watch("rol");
 
   const onSubmit: SubmitHandler<Usuarios> = async (data) => {
     try {
@@ -499,10 +534,22 @@ export function EditUsuarioDialog({ usuario, onClose }: DialogEditProps) {
             <Label htmlFor="rol" className="text-slate-300">
               Rol
             </Label>
-            <Input
-              id="rol"
+            <Select
+              onValueChange={(value) => setValue("rol", value)}
+              defaultValue={watchRol}
+            >
+              <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500">
+                <SelectValue placeholder="Seleccione un rol" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
+                <SelectItem value="Administrador">Administrador</SelectItem>
+                <SelectItem value="Delivery">Delivery</SelectItem>
+                <SelectItem value="Cliente">Cliente</SelectItem>
+              </SelectContent>
+            </Select>
+            <input
+              type="hidden"
               {...register("rol", { required: "El rol es obligatorio" })}
-              className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
             />
             {errors.rol && (
               <p className="text-red-400 text-sm">{errors.rol.message}</p>

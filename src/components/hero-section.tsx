@@ -1,15 +1,9 @@
+import { Link } from "react-router-dom";
 export function HeroSection() {
   return (
     <div className="relative bg-slate-900 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-slate-900 to-transparent z-10" />
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('/placeholder.svg?height=600&width=1200&text=Latest+Tech+Devices')",
-          opacity: 0.4,
-        }}
-      />
+      <div className="absolute inset-0 bg-cover bg-center" />
 
       <div className="container mx-auto px-4 py-16 md:py-24 relative z-20">
         <div className="max-w-xl">
@@ -21,18 +15,12 @@ export function HeroSection() {
             tecnología de punta y calidad premium.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <a
-              href="/products"
+            <Link
+              to="/productos"
               className="inline-flex items-center justify-center rounded-md bg-slate-600 px-6 py-3 text-white font-medium hover:bg-slate-500 transition-colors"
             >
               Comprar Ahora
-            </a>
-            <a
-              href="/products?category=new"
-              className="inline-flex items-center justify-center rounded-md border border-slate-600 px-6 py-3 text-white font-medium hover:bg-slate-800 transition-colors"
-            >
-              Ver Nuevos Productos
-            </a>
+            </Link>
           </div>
         </div>
       </div>

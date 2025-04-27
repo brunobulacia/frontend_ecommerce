@@ -5,7 +5,7 @@ import { useState } from "react";
 import { loginRequest } from "@/api/auth";
 import { useAuthStore } from "@/store/auth";
 import type { UserLogin, UserProfile } from "@/types/user";
-import { UserDirection } from "@/types/direccion";
+import { Direccion } from "@/types/direccion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { EyeIcon, EyeOffIcon, LockIcon, Package, UserIcon } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
+import { getDireccionId } from "@/api/direccion";
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -38,8 +39,46 @@ export function LoginPage() {
       };
 
       const resLogin = await loginRequest(user);
-      console.log(resLogin.data);
 
+      let directions: Direccion = {
+        id: 0,
+        departamento: 0,
+        pais: "",
+        ciudad: "",
+        zona: "",
+        calle: "",
+        numero: "",
+        referencia: "",
+      };
+
+      if (resLogin.data.user.direccion != null) {
+        const resDir = await getDireccionId(resLogin.data.user.direccion);
+
+        if (resDir.data.id > 0) {
+          directions = {
+            id: resDir.data.id || "",
+            departamento: 0,
+            pais: resDir.data.pais || "",
+            ciudad: resDir.data.ciudad || "",
+            zona: resDir.data.zona || "",
+            calle: resDir.data.calle || "",
+            numero: resDir.data.numero || "",
+            referencia: resDir.data.referencia || "",
+          };
+        }
+      } else {
+        directions = {
+          id: 0,
+          departamento: 0,
+          pais: "",
+          ciudad: "",
+          zona: "",
+          calle: "",
+          numero: "",
+          referencia: "",
+        };
+      }
+      console.log(resLogin.data);
       setToken(resLogin.data.token);
 
       const profile: UserProfile = {
@@ -48,44 +87,18 @@ export function LoginPage() {
         apellidos: resLogin.data.user.apellidos,
         rol: resLogin.data.user.rol,
         id: resLogin.data.user.id,
+        direccion: resLogin.data.user.direccion,
       };
 
-      if (resLogin.data.user.direccion) {
-        const direccion: UserDirection = {
-          id: resLogin.data.user.direccion.id || "",
-          departamento: {
-            id: resLogin.data.user.direccion.departamento.id || "",
-            nombre: resLogin.data.user.direccion.departamento.nombre || "",
-          },
-          pais: resLogin.data.user.direccion.pais || "",
-          ciudad: resLogin.data.user.direccion.ciudad || "",
-          zona: resLogin.data.user.direccion.zona || "",
-          calle: resLogin.data.user.direccion.calle || "",
-          numero: resLogin.data.user.direccion.numero || "",
-          referencia: resLogin.data.user.direccion.referencia || "",
-        };
-        useAuthStore.setState({ directions: direccion });
-      } else {
-        const direccion: UserDirection = {
-          id: 0,
-          departamento: {
-            id: 0,
-            nombre: "",
-          },
-          pais: "",
-          ciudad: "",
-          zona: "",
-          calle: "",
-          numero: "",
-          referencia: "",
-        };
-        useAuthStore.setState({ directions: direccion });
-      }
-
+      useAuthStore.setState({ directions });
       useAuthStore.setState({ profile });
 
       navigate("/inicio");
     } catch (error) {
+      /* setError(
+        (error as any)?.response?.data?.message ||
+          "An unexpected error occurred"
+      ); */
       console.error("Login failed:", error);
     } finally {
       setIsLoading(false);

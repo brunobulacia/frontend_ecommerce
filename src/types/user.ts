@@ -17,6 +17,7 @@ export interface UserProfile {
   correo: string;
   apellidos: string;
   rol: number;
+  direccion: number;
 }
 
 export interface updateUser {

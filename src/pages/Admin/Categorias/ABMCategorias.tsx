@@ -154,7 +154,7 @@ export default function ABMCategories() {
   }, []);
 
   return (
-    <div className="p-6 min-h-screen bg-[#1a2035]">
+    <div className="p-6 min-h-screen">
       <Card className="max-w-5xl mx-auto border-slate-700 shadow-md rounded-xl overflow-hidden bg-[#1e2745]">
         <CardHeader className="bg-[#1e2745] border-b border-slate-700 pb-4">
           <div className="flex justify-between items-center">

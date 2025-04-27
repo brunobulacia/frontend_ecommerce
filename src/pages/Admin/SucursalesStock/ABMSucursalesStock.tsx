@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
+  Filter,
   Plus,
   Search,
   Trash2,
@@ -25,12 +26,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  type Producto,
-  createProduct,
-  deleteProduct,
-  getProducts,
-  updateProduct,
-} from "@/api/products";
+  createSucursal,
+  deleteSucursal,
+  getSucursales,
+  updateSucursal,
+} from "@/api/sucursales";
+
+import { Sucursal } from "@/types/sucursal";
 
 import {
   Dialog,
@@ -42,19 +44,18 @@ import {
 } from "@/components/ui/dialog";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
 
-const columnHelper = createColumnHelper<Producto>();
+const columnHelper = createColumnHelper<Sucursal>();
 
-export default function ABMProductos() {
-  const [productos, setProductos] = useState<Producto[]>([]);
+export default function ABMSucursalesStock() {
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtering, setFiltering] = useState("");
   const [showDialogCrear, setShowDialogCrear] = useState(false);
   const [showDialogEditar, setShowDialogEditar] = useState(false);
   const [showDialogBorrar, setShowDialogBorrar] = useState(false);
-  const [selectedProducto, setSelectedProducto] = useState<Producto | null>(
+  const [selectedSucursal, setSelectedSucursal] = useState<Sucursal | null>(
     null
   );
 
@@ -70,14 +71,22 @@ export default function ABMProductos() {
         </Badge>
       ),
     }),
-    columnHelper.accessor("nombre", {
-      header: "Nombre",
+    columnHelper.accessor("sucursal", {
+      header: "Sucursal",
       cell: (info) => (
         <span className="font-medium text-white">{info.getValue()}</span>
       ),
     }),
-    columnHelper.accessor("descripcion", {
-      header: "Descripción",
+    columnHelper.accessor("producto", {
+      header: "Producto",
+      cell: (info) => <span className="text-slate-300">{info.getValue()}</span>,
+    }),
+    columnHelper.accessor("departamento", {
+      header: "Departamento",
+      cell: (info) => <span className="text-slate-300">{info.getValue()}</span>,
+    }),
+    columnHelper.accessor("stock", {
+      header: "Stock",
       cell: (info) => <span className="text-slate-300">{info.getValue()}</span>,
     }),
     columnHelper.display({
@@ -91,17 +100,15 @@ export default function ABMProductos() {
             className="h-8 px-2 text-xs border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white"
             onClick={() => handleEditar(row.original)}
           >
-            <Edit className="h-3.5 w-3.5 mr-1" />
-            Editar
+            <Edit className="h-3.5 w-3.5" />
           </Button>
           <Button
             size="sm"
             variant="destructive"
-            className="h-8 px-2 text-xs"
+            className="h-8 px-2 text-xs bg-red-600 text-white hover:bg-red-600"
             onClick={() => handleEliminar(row.original)}
           >
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Borrar
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
@@ -109,7 +116,7 @@ export default function ABMProductos() {
   ];
 
   const table = useReactTable({
-    data: productos,
+    data: sucursales,
     columns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(),
@@ -124,33 +131,33 @@ export default function ABMProductos() {
     },
   });
 
-  const handleEditar = (producto: Producto) => {
-    setSelectedProducto(producto);
+  const handleEditar = (sucursal: Sucursal) => {
+    setSelectedSucursal(sucursal);
     setShowDialogEditar(true);
   };
 
-  const handleEliminar = (producto: Producto) => {
-    setSelectedProducto(producto);
+  const handleEliminar = (sucursal: Sucursal) => {
+    setSelectedSucursal(sucursal);
     setShowDialogBorrar(true);
   };
 
-  const crearProducto = () => {
+  const crearSucursal = () => {
     setShowDialogCrear(true);
   };
 
   useEffect(() => {
-    async function fetchProductos() {
+    async function fetchSucursales() {
       try {
-        const res = await getProducts();
-        setProductos(res.data);
+        const res = await getSucursales();
+        setSucursales(res.data);
       } catch (error) {
-        setError("No se pudo obtener la información de los productos.");
+        setError("No se pudo obtener la información de las sucursales.");
         console.error(error);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchProductos();
+    fetchSucursales();
   }, []);
 
   return (
@@ -159,15 +166,24 @@ export default function ABMProductos() {
         <CardHeader className="bg-[#1e2745] border-b border-slate-700 pb-4">
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl font-bold text-white">
-              Gestión de Productos
+              Gestión de Stock de Sucursales
             </CardTitle>
-            <Button
-              onClick={crearProducto}
-              className="bg-slate-600 hover:bg-slate-500 text-white"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nuevo Producto
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={crearSucursal}
+                className="bg-slate-600 hover:bg-slate-500 text-white"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Crear Reporte
+              </Button>
+              <Button
+                onClick={crearSucursal}
+                className="bg-slate-600 hover:bg-slate-500 text-white"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Stock de Sucursal
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-6 bg-[#1e2745]">
@@ -186,7 +202,7 @@ export default function ABMProductos() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
             <Input
               className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-              placeholder="Buscar productos..."
+              placeholder="Buscar sucursales..."
               value={filtering}
               onChange={(e) => setFiltering(e.target.value)}
             />
@@ -253,7 +269,7 @@ export default function ABMProductos() {
                           colSpan={columns.length}
                           className="h-24 text-center text-slate-400"
                         >
-                          No se encontraron productos
+                          No se encontraron sucursales
                         </td>
                       </tr>
                     )}
@@ -264,7 +280,7 @@ export default function ABMProductos() {
               <div className="flex items-center justify-between space-x-2 py-4">
                 <div className="text-sm text-slate-400">
                   Mostrando {table.getRowModel().rows.length} de{" "}
-                  {productos.length} productos
+                  {sucursales.length} sucursales
                 </div>
                 <div className="flex items-center space-x-2">
                   <Button
@@ -298,23 +314,23 @@ export default function ABMProductos() {
         </CardContent>
       </Card>
 
-      {/* Crear Producto */}
+      {/* Crear Sucursal */}
       {showDialogCrear && (
-        <DialogCrearProducto onClose={() => setShowDialogCrear(false)} />
+        <DialogCrearSucursal onClose={() => setShowDialogCrear(false)} />
       )}
 
-      {/* Editar Producto */}
-      {showDialogEditar && selectedProducto && (
-        <EditProductoDialog
-          producto={selectedProducto}
+      {/* Editar Sucursal */}
+      {showDialogEditar && selectedSucursal && (
+        <EditSucursalDialog
+          sucursal={selectedSucursal}
           onClose={() => setShowDialogEditar(false)}
         />
       )}
 
-      {/* Borrar Producto */}
-      {showDialogBorrar && selectedProducto && (
-        <DialogBorrarProducto
-          producto={selectedProducto}
+      {/* Borrar Sucursal */}
+      {showDialogBorrar && selectedSucursal && (
+        <DialogBorrarSucursal
+          sucursal={selectedSucursal}
           onClose={() => setShowDialogBorrar(false)}
         />
       )}
@@ -322,22 +338,22 @@ export default function ABMProductos() {
   );
 }
 
-// DIALOG CREAR PRODUCTO
+// DIALOG CREAR SUCURSAL
 interface DialogCrearProps {
   onClose: () => void;
 }
 
-export function DialogCrearProducto({ onClose }: DialogCrearProps) {
+export function DialogCrearSucursal({ onClose }: DialogCrearProps) {
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<Producto>();
+  } = useForm<Sucursal>();
 
-  const onSubmit: SubmitHandler<Producto> = async (data) => {
+  const onSubmit: SubmitHandler<Sucursal> = async (data) => {
     try {
-      await createProduct(data);
+      await createSucursal(data);
       reset();
       window.location.reload();
       onClose();
@@ -351,58 +367,81 @@ export function DialogCrearProducto({ onClose }: DialogCrearProps) {
       <DialogContent className="sm:max-w-[500px] bg-[#1e2745] border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
-            Nuevo Producto
+            Nueva Stock de Sucursal
           </DialogTitle>
           <DialogDescription className="text-slate-300">
-            Complete el formulario para crear un nuevo producto
+            Complete el formulario para crear un nuevo stock de sucursal
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label
-              htmlFor="nombre"
+              htmlFor="sucursal"
               className="text-sm font-medium text-slate-300"
             >
-              Nombre
+              Sucursal
             </Label>
             <Input
-              id="nombre"
-              placeholder="Ingrese el nombre del producto"
-              {...register("nombre", {
-                required: "El nombre del producto es obligatorio",
+              id="sucursal"
+              placeholder="Ingrese el nombre de la sucursal"
+              {...register("sucursal", {
+                required: "El nombre de la sucursal es obligatorio",
               })}
               className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
-                errors.nombre ? "border-red-500" : ""
+                errors.sucursal ? "border-red-500" : ""
               }`}
             />
-            {errors.nombre && (
+            {errors.sucursal && (
               <p className="text-red-400 text-xs mt-1">
-                {errors.nombre.message}
+                {errors.sucursal.message}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label
-              htmlFor="descripcion"
+              htmlFor="producto"
               className="text-sm font-medium text-slate-300"
             >
-              Descripción
+              Producto
             </Label>
-            <Textarea
-              id="descripcion"
-              placeholder="Ingrese la descripción del producto"
-              {...register("descripcion", {
-                required: "La descripción es obligatoria",
+            <Input
+              id="producto"
+              placeholder="Ingrese el producto de la sucursal"
+              {...register("producto", {
+                required: "La dirección es obligatoria",
               })}
               className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
-                errors.descripcion ? "border-red-500" : ""
+                errors.producto ? "border-red-500" : ""
               }`}
-              rows={3}
             />
-            {errors.descripcion && (
+            {errors.producto && (
               <p className="text-red-400 text-xs mt-1">
-                {errors.descripcion.message}
+                {errors.producto.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="stock"
+              className="text-sm font-medium text-slate-300"
+            >
+              Stock
+            </Label>
+            <Input
+              id="stock"
+              placeholder="Ingrese el stock del producto"
+              {...register("stock", {
+                required: "El teléfono es obligatorio",
+              })}
+              className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
+                errors.stock ? "border-red-500" : ""
+              }`}
+            />
+            {errors.stock && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.stock.message}
               </p>
             )}
           </div>
@@ -422,7 +461,7 @@ export function DialogCrearProducto({ onClose }: DialogCrearProps) {
               className="bg-slate-600 hover:bg-slate-500 text-white"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Guardando..." : "Guardar Producto"}
+              {isSubmitting ? "Guardando..." : "Guardar Sucursal"}
             </Button>
           </DialogFooter>
         </form>
@@ -431,18 +470,19 @@ export function DialogCrearProducto({ onClose }: DialogCrearProps) {
   );
 }
 
-// DIALOG EDITAR PRODUCTO
+// DIALOG EDITAR SUCURSAL
 interface DialogEditProps {
-  producto: Partial<Producto>;
+  sucursal: Partial<Sucursal>;
   onClose: () => void;
 }
 
 interface FormData {
-  nombre: string;
-  descripcion: string;
+  sucursal: string;
+  producto: string;
+  stock: number;
 }
 
-export function EditProductoDialog({ producto, onClose }: DialogEditProps) {
+export function EditSucursalDialog({ sucursal, onClose }: DialogEditProps) {
   const {
     register,
     handleSubmit,
@@ -450,31 +490,18 @@ export function EditProductoDialog({ producto, onClose }: DialogEditProps) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     defaultValues: {
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
+      sucursal: sucursal.sucursal,
+      producto: sucursal.producto,
+      stock: sucursal.stock,
     },
   });
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const updatedProducto: Producto = {
-        id: producto.id!, // Asegúrate de que el id esté presente
-        nombre: data.nombre,
-        descripcion: data.descripcion,
-        proveedor: producto.proveedor || "",
-        descuento: producto.descuento || null,
-        imagenes: producto.imagenes || [],
-        stock_total: producto.stock_total || 0,
-        detalle: {
-          marca: producto.detalle?.marca || "",
-          precio: producto.detalle?.precio || 0,
-        },
-        categorias: producto.categorias || [],
-      };
-
-      await updateProduct(updatedProducto);
+      await updateSucursal(sucursal.id!, data);
       reset();
       window.location.reload();
+      // console.log(updatedSucursal);
       onClose();
     } catch (error) {
       console.error("Error de conexión:", error);
@@ -486,57 +513,79 @@ export function EditProductoDialog({ producto, onClose }: DialogEditProps) {
       <DialogContent className="sm:max-w-[500px] bg-[#1e2745] border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-white">
-            Editar Producto
+            Editar Sucursal
           </DialogTitle>
           <DialogDescription className="text-slate-300">
-            Modifique los datos del producto{" "}
-            <span className="font-medium text-white">{producto.nombre}</span>
+            Modifique los datos de la sucursal{" "}
+            <span className="font-medium text-white">{sucursal.sucursal}</span>
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label
-              htmlFor="nombre"
+              htmlFor="sucursal"
               className="text-sm font-medium text-slate-300"
             >
-              Nombre
+              Sucursal
             </Label>
             <Input
-              id="nombre"
-              {...register("nombre", {
-                required: "El nombre es obligatorio",
+              id="sucursal"
+              {...register("sucursal", {
+                required: "El sucursal es obligatorio",
               })}
               className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
-                errors.nombre ? "border-red-500" : ""
+                errors.sucursal ? "border-red-500" : ""
               }`}
             />
-            {errors.nombre && (
+            {errors.sucursal && (
               <p className="text-red-400 text-xs mt-1">
-                {errors.nombre.message}
+                {errors.sucursal.message}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
             <Label
-              htmlFor="descripcion"
+              htmlFor="producto"
               className="text-sm font-medium text-slate-300"
             >
-              Descripción
+              Producto
             </Label>
-            <Textarea
-              id="descripcion"
-              {...register("descripcion", {
-                required: "La descripción es obligatoria",
+            <Input
+              id="producto"
+              {...register("producto", {
+                required: "La dirección es obligatoria",
               })}
               className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
-                errors.descripcion ? "border-red-500" : ""
+                errors.producto ? "border-red-500" : ""
               }`}
-              rows={3}
             />
-            {errors.descripcion && (
+            {errors.producto && (
               <p className="text-red-400 text-xs mt-1">
-                {errors.descripcion.message}
+                {errors.producto.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="stock"
+              className="text-sm font-medium text-slate-300"
+            >
+              Stock
+            </Label>
+            <Input
+              id="stock"
+              {...register("stock", {
+                required: "El teléfono es obligatorio",
+              })}
+              className={`bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
+                errors.stock ? "border-red-500" : ""
+              }`}
+            />
+            {errors.stock && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.stock.message}
               </p>
             )}
           </div>
@@ -565,17 +614,17 @@ export function EditProductoDialog({ producto, onClose }: DialogEditProps) {
   );
 }
 
-// DIALOG BORRAR PRODUCTO
+// DIALOG BORRAR SUCURSAL
 interface confirmar {
   confirmacion: string;
 }
 
 interface DialogBorrarProps {
-  producto: Producto;
+  sucursal: Sucursal;
   onClose: () => void;
 }
 
-export function DialogBorrarProducto({ producto, onClose }: DialogBorrarProps) {
+export function DialogBorrarSucursal({ sucursal, onClose }: DialogBorrarProps) {
   const {
     register,
     handleSubmit,
@@ -588,7 +637,7 @@ export function DialogBorrarProducto({ producto, onClose }: DialogBorrarProps) {
       return;
     }
     try {
-      await deleteProduct(producto.id);
+      await deleteSucursal(sucursal.id);
       window.location.reload();
       onClose();
     } catch (error) {
@@ -601,12 +650,12 @@ export function DialogBorrarProducto({ producto, onClose }: DialogBorrarProps) {
       <DialogContent className="sm:max-w-[500px] bg-[#1e2745] border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-red-400">
-            Eliminar Producto
+            Eliminar Sucursal
           </DialogTitle>
           <DialogDescription className="text-slate-300">
-            Esta acción no se puede deshacer. Se eliminará permanentemente el
-            producto{" "}
-            <span className="font-medium text-white">{producto.nombre}</span>.
+            Esta acción no se puede deshacer. Se eliminará permanentemente la
+            sucursal{" "}
+            <span className="font-medium text-white">{sucursal.sucursal}</span>.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -618,7 +667,7 @@ export function DialogBorrarProducto({ producto, onClose }: DialogBorrarProps) {
             <AlertTitle>Advertencia</AlertTitle>
             <AlertDescription>
               Esta acción puede afectar a otros elementos del sistema que
-              dependan de este producto.
+              dependan de esta sucursal.
             </AlertDescription>
           </Alert>
 
@@ -665,7 +714,7 @@ export function DialogBorrarProducto({ producto, onClose }: DialogBorrarProps) {
               disabled={isSubmitting}
               className="bg-red-700 hover:bg-red-600 text-white"
             >
-              {isSubmitting ? "Eliminando..." : "Eliminar Producto"}
+              {isSubmitting ? "Eliminando..." : "Eliminar Sucursal"}
             </Button>
           </DialogFooter>
         </form>

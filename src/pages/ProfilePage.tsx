@@ -22,14 +22,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { useToast } from "@/components/ui/use-toast"
 import { ProfileSidebar } from "@/components/profile-sidebar.tsx";
 import { UserCircle, Mail } from "lucide-react";
 import { useAuthStore } from "@/store/auth.ts";
-import { updateUsuario, Usuarios } from "@/api/user";
-import { updateDireccionRequest } from "@/api/direccion";
-import { UpdateDireccionRequest } from "@/types/direccion";
-import { updateUser } from "@/types/user";
+// import { updateUsuario, Usuarios } from "@/api/user";
+import { crearDireccion } from "@/api/direccion";
+import { Direccion } from "@/types/direccion";
+import { toast } from "sonner";
 
 const profileFormSchema = z.object({
   nombre: z.string().min(2, "El nombre deberia ser de al menos 2 caracteres."),
@@ -37,18 +36,7 @@ const profileFormSchema = z.object({
   correo: z.string().email("El correo no es valido."),
 });
 
-const addressFormSchema = z.object({
-  pais: z.string().min(2, "Pais is required"),
-  departamento: z.string().min(2, "Departamento is required"),
-  ciudad: z.string().min(2, "Ciudad is required"),
-  zona: z.string().min(2, "Zona is required"),
-  calle: z.string().min(2, "Calle is required"),
-  numero: z.string().min(1, "Numero is required"),
-  referencia: z.string().optional(),
-});
-
 export function ProfilePage() {
-  //   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const profile = useAuthStore((state) => state.profile);
   const direccion = useAuthStore((state) => state.directions);
@@ -62,11 +50,10 @@ export function ProfilePage() {
     },
   });
 
-  const addressForm = useForm<z.infer<typeof addressFormSchema>>({
-    resolver: zodResolver(addressFormSchema),
+  const addressForm = useForm<Direccion>({
     defaultValues: {
       pais: direccion.pais,
-      departamento: direccion.departamento.nombre,
+      departamento: 0,
       ciudad: direccion.ciudad,
       zona: direccion.zona,
       calle: direccion.calle,
@@ -79,17 +66,13 @@ export function ProfilePage() {
     setIsSubmitting(true);
 
     try {
-      /* const updatedUser : Usuarios = {
+      const updatedUser = {
         nombre: values.nombre || profile.nombre,
         apellidos: values.apellidos || profile.apellidos,
         correo: values.correo || profile.correo,
-        id : 
-      }; */
+      };
 
-      // console.log(updatedUser);
-      // const res = await updateUsuario(updatedUser);
-      // console.log(res.data);
-      // useAuthStore.setState({ profile: res.data });
+      console.log(updatedUser);
       setIsSubmitting(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -97,26 +80,31 @@ export function ProfilePage() {
     }
   };
 
-  async function onAddressSubmit(values: z.infer<typeof addressFormSchema>) {
+  async function onAddressSubmit(values: Direccion) {
     setIsSubmitting(true);
 
     try {
-      const updatedAddress: UpdateDireccionRequest = {
-        id_direccion: direccion.id,
-        pais: values.pais || direccion.pais,
-        departamento: values.departamento || direccion.departamento.nombre,
-        ciudad: values.ciudad || direccion.ciudad,
-        zona: values.zona || direccion.zona,
-        calle: values.calle || direccion.calle,
-        numero: values.numero || direccion.numero,
-        referencia: values.referencia || direccion.referencia,
+      const updatedAddress: Direccion = {
+        id: direccion.id,
+        pais: values.pais,
+        departamento: values.departamento,
+        ciudad: values.ciudad,
+        zona: values.zona,
+        calle: values.calle,
+        numero: values.numero,
+        referencia: values.referencia,
       };
 
       console.log(updatedAddress);
-      const res = await updateDireccionRequest(updatedAddress);
+      const res = await crearDireccion(updatedAddress);
       console.log(res.data);
       setIsSubmitting(false);
       useAuthStore.setState({ directions: res.data });
+      if (res) {
+        toast("Direccion actualizada.");
+        alert("Direccion actualizada.");
+        window.location.reload();
+      }
     } catch (error) {
       console.error("Error updating address:", error);
       setIsSubmitting(false);
@@ -254,10 +242,10 @@ export function ProfilePage() {
               <Card className="border-slate-700 bg-slate-800 shadow-xl">
                 <CardHeader>
                   <CardTitle className="text-2xl text-white">
-                    Informacion de la direccion.
+                    Información de la dirección
                   </CardTitle>
                   <CardDescription className="text-slate-400">
-                    Actualice sus detalles de envio.
+                    Actualice sus detalles de envío.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -266,151 +254,145 @@ export function ProfilePage() {
                       onSubmit={addressForm.handleSubmit(onAddressSubmit)}
                       className="space-y-6"
                     >
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={addressForm.control}
-                          name="pais"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Pais
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={addressForm.control}
+                        name="pais"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              País
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={addressForm.control}
-                          name="departamento"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Departamento
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      <FormField
+                        control={addressForm.control}
+                        name="departamento"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Departamento
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                          control={addressForm.control}
-                          name="ciudad"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Ciudad
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={addressForm.control}
+                        name="ciudad"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Ciudad
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={addressForm.control}
-                          name="zona"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Zona
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      <FormField
+                        control={addressForm.control}
+                        name="zona"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Zona
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FormField
-                          control={addressForm.control}
-                          name="calle"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Calle
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={addressForm.control}
+                        name="calle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Calle
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={addressForm.control}
-                          name="numero"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Numero
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                      <FormField
+                        control={addressForm.control}
+                        name="numero"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Número
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                        <FormField
-                          control={addressForm.control}
-                          name="referencia"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-slate-200">
-                                Referencia
-                              </FormLabel>
-                              <FormControl>
-                                <Input
-                                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                      <FormField
+                        control={addressForm.control}
+                        name="referencia"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-slate-200">
+                              Referencia
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
                       <Button
                         type="submit"
                         className="bg-slate-600 hover:bg-slate-500 text-white"
                         disabled={isSubmitting}
                       >
-                        {isSubmitting ? "Guardando..." : "Guardar Direccion"}
+                        {isSubmitting ? "Guardando..." : "Guardar Dirección"}
                       </Button>
                     </form>
                   </Form>

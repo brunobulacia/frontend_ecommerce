@@ -4,12 +4,11 @@ import { Link } from "react-router-dom";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  LayoutDashboard,
   Package,
   ShoppingCart,
   Users,
   Tag,
-  Settings,
+  MapPinHouse,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -28,11 +27,6 @@ export function AdminSidebar() {
   };
 
   const navItems = [
-    {
-      title: "Dashboard",
-      to: "/admin",
-      icon: LayoutDashboard,
-    },
     {
       title: "Productos",
       to: "/admin/productos",
@@ -53,13 +47,18 @@ export function AdminSidebar() {
       to: "/admin/categorias",
       icon: Tag,
     },
+    {
+      title: "Sucursales y Stock",
+      to: "/admin/stocks",
+      icon: MapPinHouse,
+    },
   ];
 
   return (
     <div className="hidden md:flex flex-col w-64 bg-slate-800 border-r border-slate-700 h-screen sticky top-0">
       <div className="p-4 border-b border-slate-700">
         <Link
-          to="/admin"
+          to="/admin/productos"
           className="flex items-center gap-2 font-bold text-white"
         >
           <Package className="h-6 w-6" />

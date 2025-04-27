@@ -31,3 +31,6 @@ export const updateProduct = async (product: Partial<Producto>) =>
 
 export const deleteProduct = async (id: number) =>
   await axios.delete(`/productos/productos/${id}/`);
+
+export const filtrarProductos = async (param: string) =>
+  axios.get(`/productos/productos/?${param}`);

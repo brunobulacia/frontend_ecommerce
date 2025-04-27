@@ -28,7 +28,7 @@ export function Categories() {
         {categoriesData.map((category) => (
           <Link
             key={category.nombre}
-            to={"/"}
+            to={`/productos_cat?categoria_id=${category.id}`}
             className="flex flex-col items-center justify-center p-4 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors"
           >
             <div className="bg-slate-700 p-3 rounded-full mb-3">

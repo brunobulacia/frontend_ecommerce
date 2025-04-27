@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Heart, ChevronLeft, ChevronRight } from "lucide-react";
-import { getProducts } from "@/api/products";
+import { filtrarProductos } from "@/api/products";
 import ReactPaginate from "react-paginate";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "react-router-dom";
 
 // Definición de tipos
 interface ProductCategory {
@@ -123,10 +124,11 @@ const ProductCard = ({ product }: { product: Product }) => {
 };
 
 // Componente de grid de productos con paginación
-export default function ProductsPage() {
+export default function CategoryProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(0);
@@ -140,7 +142,8 @@ export default function ProductsPage() {
         setIsLoading(true);
         // En un caso real, pasarías los parámetros de paginación a tu API
         // const response = await getProducts({ page: currentPage + 1, limit: productsPerPage })
-        const response = await getProducts();
+        console.log(searchParams.toString());
+        const response = await filtrarProductos(searchParams.toString());
         console.log(response.data);
         // Simulando paginación del lado del cliente (en un caso real, esto lo haría tu API)
         const allProducts = response.data;
@@ -179,7 +182,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="p-6 bg-[#1a2035] rounded-md">
+    <div className="p-6 bg-[#1a2035]">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-white">Nuestros productos</h2>
         <div className="text-slate-300 text-sm">

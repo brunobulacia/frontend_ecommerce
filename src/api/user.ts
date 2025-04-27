@@ -11,13 +11,14 @@ export interface Usuarios {
 
 export const getUsuarios = async () => axios.get("usuarios/");
 
-export const getUsuarioById = async (id: number) => axios.get(`usuarios/${id}`);
+export const getUsuarioById = async (id: number) =>
+  axios.get(`usuarios/${id}/`);
 
 export const createUsuario = async (user: Usuarios) =>
   axios.post("usuarios/", user);
 
 export const updateUsuario = async (id: number, user: Partial<Usuarios>) =>
-  axios.put(`usuarios/${id}`, user);
+  axios.put(`usuarios/${id}/`, user);
 
 export const deleteUsuario = async (id: number) =>
-  axios.delete(`usuarios/${id}`);
+  axios.delete(`usuarios/${id}/`);

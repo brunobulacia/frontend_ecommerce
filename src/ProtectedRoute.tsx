@@ -17,7 +17,7 @@ function ProtectedRoute({ isAllowed, children }: authProps) {
 }
 
 export function AdminRoute({ rol, children }: adminProps) {
-  if (rol != 2) return <Navigate to="/inicio" />;
+  if (rol != 1) return <Navigate to="/inicio" />;
   return children ? <>{children}</> : <Outlet />;
 }
 

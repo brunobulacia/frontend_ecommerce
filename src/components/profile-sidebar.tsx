@@ -27,7 +27,7 @@ export function ProfileSidebar() {
       icon: User,
     },
     {
-      to: "/perfil/orders",
+      to: "/pedidos",
       label: "Pedidos",
       icon: Package,
     },
