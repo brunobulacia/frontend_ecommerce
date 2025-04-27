@@ -13,9 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertCircle,
+  BarChart3,
+  CalendarIcon,
   ChevronLeft,
   ChevronRight,
   Edit,
+  FileText,
   Filter,
   Plus,
   Search,
@@ -30,9 +33,9 @@ import {
   deleteSucursal,
   getSucursales,
   updateSucursal,
-} from "@/api/sucursales";
+} from "@/api/stock";
 
-import { Sucursal } from "@/types/sucursal";
+import { SucursalStock } from "@/types/stock";
 
 import {
   Dialog,
@@ -45,19 +48,38 @@ import {
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 
-const columnHelper = createColumnHelper<Sucursal>();
+import { getReporteStocks, getReporteStocksExcel } from "@/api/reportes";
+import { FiltrosReportesStocks } from "@/types/reportes";
+import { Separator } from "@radix-ui/react-dropdown-menu";
+
+// PARA CARGAR LOS DROPDOWNS
+import { Sucursal } from "@/types/sucursal";
+import { Product } from "@/types/products";
+import { getSucursales as getSucursalesDropdown } from "@/api/sucursales";
+import { getProducts } from "@/api/products";
+
+//COMPONENTES DROPDOWN
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const columnHelper = createColumnHelper<SucursalStock>();
 
 export default function ABMSucursalesStock() {
-  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
+  const [sucursales, setSucursales] = useState<SucursalStock[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filtering, setFiltering] = useState("");
   const [showDialogCrear, setShowDialogCrear] = useState(false);
   const [showDialogEditar, setShowDialogEditar] = useState(false);
   const [showDialogBorrar, setShowDialogBorrar] = useState(false);
-  const [selectedSucursal, setSelectedSucursal] = useState<Sucursal | null>(
-    null
-  );
+  const [selectedSucursal, setSelectedSucursal] =
+    useState<SucursalStock | null>(null);
+  const [showDialogReporte, setShowDialogReporte] = useState(false);
 
   const columns = [
     columnHelper.accessor("id", {
@@ -131,12 +153,12 @@ export default function ABMSucursalesStock() {
     },
   });
 
-  const handleEditar = (sucursal: Sucursal) => {
+  const handleEditar = (sucursal: SucursalStock) => {
     setSelectedSucursal(sucursal);
     setShowDialogEditar(true);
   };
 
-  const handleEliminar = (sucursal: Sucursal) => {
+  const handleEliminar = (sucursal: SucursalStock) => {
     setSelectedSucursal(sucursal);
     setShowDialogBorrar(true);
   };
@@ -145,10 +167,15 @@ export default function ABMSucursalesStock() {
     setShowDialogCrear(true);
   };
 
+  const generarReporte = () => {
+    setShowDialogReporte(true);
+  };
+
   useEffect(() => {
     async function fetchSucursales() {
       try {
         const res = await getSucursales();
+        console.log(res);
         setSucursales(res.data);
       } catch (error) {
         setError("No se pudo obtener la información de las sucursales.");
@@ -170,7 +197,7 @@ export default function ABMSucursalesStock() {
             </CardTitle>
             <div className="flex items-center gap-2">
               <Button
-                onClick={crearSucursal}
+                onClick={generarReporte}
                 className="bg-slate-600 hover:bg-slate-500 text-white"
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -314,6 +341,13 @@ export default function ABMSucursalesStock() {
         </CardContent>
       </Card>
 
+      {showDialogReporte && (
+        <DialogReporteStock
+          onClose={() => setShowDialogReporte(false)}
+          getReporteStocks={getReporteStocks}
+        />
+      )}
+
       {/* Crear Sucursal */}
       {showDialogCrear && (
         <DialogCrearSucursal onClose={() => setShowDialogCrear(false)} />
@@ -338,6 +372,256 @@ export default function ABMSucursalesStock() {
   );
 }
 
+interface ReporteStockProps {
+  onClose: () => void;
+  getReporteStocks: (data: FiltrosReportesStocks) => void;
+}
+
+// Bolivia departments
+const DEPARTAMENTOS_BOLIVIA = [
+  "Santa Cruz",
+  "La Paz",
+  "Cochabamba",
+  "Tarija",
+  "Chuquisaca",
+  "Beni",
+  "Oruro",
+  "Potosi",
+  "Pando",
+];
+
+export function DialogReporteStock({
+  onClose,
+  getReporteStocks,
+}: ReporteStockProps) {
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+    setValue,
+  } = useForm<FiltrosReportesStocks>();
+
+  const [sucursalesDropdown, setSucursalesDropdown] = useState<Sucursal[]>([]);
+  const [productsDropdown, setProductsDropdown] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSucursalesProductos = async () => {
+      try {
+        const response = await getSucursalesDropdown();
+        const resProd = await getProducts();
+        setSucursalesDropdown(response.data);
+        setProductsDropdown(resProd.data);
+      } catch (error) {
+        console.error("Error al obtener sucursales o productos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSucursalesProductos();
+  }, []);
+
+  const onSubmit: SubmitHandler<FiltrosReportesStocks> = async (
+    data: FiltrosReportesStocks
+  ) => {
+    try {
+      // Aquí iría la lógica para generar el reporte con los filtros
+      console.log("Filtros para reporte:", data);
+      getReporteStocks(data);
+      getReporteStocksExcel(data);
+      reset();
+      onClose();
+    } catch (error) {
+      console.error("Error al generar reporte:", error);
+    }
+  };
+
+  return (
+    <Dialog open={true} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto bg-[#1e2745] border-slate-700 text-white">
+        <DialogHeader className="space-y-2">
+          <div className="flex items-center">
+            <FileText className="h-5 w-5 mr-2 text-slate-300" />
+            <DialogTitle className="text-lg font-semibold text-white">
+              Generar Reporte de Stocks
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-slate-300 text-sm">
+            Configure los filtros para generar un reporte personalizado.
+          </DialogDescription>
+          <Separator className="bg-slate-700" />
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="py-2 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Sección de Sucursal - Select */}
+            <div className="space-y-2">
+              <Label className="text-xs text-slate-300 flex items-center">
+                <Search className="h-3 w-3 mr-1 text-slate-400" />
+                Sucursal
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setValue("sucursal", value, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500 h-9">
+                  <SelectValue placeholder="Seleccionar sucursal" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-slate-800 border-slate-700 text-slate-200 max-h-[180px]"
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={5}
+                >
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  {sucursalesDropdown.map((sucursal) => (
+                    <SelectItem key={sucursal.id} value={sucursal.nombre}>
+                      {sucursal.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("sucursal", { required: "Sucursal es requerida" })}
+              />
+              {errors.sucursal && (
+                <p className="text-red-400 text-xs">
+                  {errors.sucursal.message}
+                </p>
+              )}
+            </div>
+
+            {/* Sección de Departamento - Select */}
+            <div className="space-y-2">
+              <Label className="text-xs text-slate-300 flex items-center">
+                <FileText className="h-3 w-3 mr-1 text-slate-400" />
+                Departamento
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setValue("departamento", value, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500 h-9">
+                  <SelectValue placeholder="Seleccionar departamento" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-slate-800 border-slate-700 text-slate-200"
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={5}
+                >
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  {DEPARTAMENTOS_BOLIVIA.map((departamento) => (
+                    <SelectItem key={departamento} value={departamento}>
+                      {departamento}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("departamento", {
+                  required: "Departamento es requerido",
+                })}
+              />
+              {errors.departamento && (
+                <p className="text-red-400 text-xs">
+                  {errors.departamento.message}
+                </p>
+              )}
+            </div>
+
+            {/* Sección de Producto - Select */}
+            <div className="space-y-2">
+              <Label className="text-xs text-slate-300 flex items-center">
+                <Search className="h-3 w-3 mr-1 text-slate-400" />
+                Producto
+              </Label>
+              <Select
+                onValueChange={(value) =>
+                  setValue("producto", value, { shouldValidate: true })
+                }
+              >
+                <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500 h-9">
+                  <SelectValue placeholder="Seleccionar producto" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-slate-800 border-slate-700 text-slate-200 max-h-[180px]"
+                  position="popper"
+                  side="bottom"
+                  align="start"
+                  sideOffset={5}
+                >
+                  <SelectItem value="Todos">Todos</SelectItem>
+                  {productsDropdown.map((producto) => (
+                    <SelectItem key={producto.id} value={producto.nombre}>
+                      {producto.nombre}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("producto", { required: "Producto es requerido" })}
+              />
+              {errors.producto && (
+                <p className="text-red-400 text-xs">
+                  {errors.producto.message}
+                </p>
+              )}
+            </div>
+
+            {/* Sección de Stock Mínimo */}
+            <div className="space-y-2">
+              <Label className="text-xs text-slate-300 flex items-center">
+                <CalendarIcon className="h-3 w-3 mr-1 text-slate-400" />
+                Stock Mínimo
+              </Label>
+              <Input
+                id="stock_minimo"
+                type="number"
+                {...register("stock_minimo", {
+                  required: "Stock mínimo es requerido",
+                })}
+                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-slate-500 focus-visible:border-slate-500 h-9"
+              />
+              {errors.stock_minimo && (
+                <p className="text-red-400 text-xs">
+                  {errors.stock_minimo.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2 mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white h-9"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-slate-600 hover:bg-slate-500 text-white flex items-center gap-2 h-9"
+            >
+              <BarChart3 className="h-4 w-4" />
+              {isSubmitting ? "Generando..." : "Generar Reporte"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 // DIALOG CREAR SUCURSAL
 interface DialogCrearProps {
   onClose: () => void;
@@ -349,9 +633,9 @@ export function DialogCrearSucursal({ onClose }: DialogCrearProps) {
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<Sucursal>();
+  } = useForm<SucursalStock>();
 
-  const onSubmit: SubmitHandler<Sucursal> = async (data) => {
+  const onSubmit: SubmitHandler<SucursalStock> = async (data) => {
     try {
       await createSucursal(data);
       reset();
@@ -472,7 +756,7 @@ export function DialogCrearSucursal({ onClose }: DialogCrearProps) {
 
 // DIALOG EDITAR SUCURSAL
 interface DialogEditProps {
-  sucursal: Partial<Sucursal>;
+  sucursal: Partial<SucursalStock>;
   onClose: () => void;
 }
 
@@ -620,7 +904,7 @@ interface confirmar {
 }
 
 interface DialogBorrarProps {
-  sucursal: Sucursal;
+  sucursal: SucursalStock;
   onClose: () => void;
 }
 

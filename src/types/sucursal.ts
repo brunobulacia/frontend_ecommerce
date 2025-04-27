@@ -1,7 +1,6 @@
 export interface Sucursal {
   id: number;
-  sucursal: string;
-  producto: string;
+  nombre: string;
+  telefono: string;
   departamento: string;
-  stock: number;
 }

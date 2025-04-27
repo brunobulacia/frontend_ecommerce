@@ -4,3 +4,10 @@ export interface FiltrosReportesPedidos {
   monto_minimo: number;
   estado: string;
 }
+
+export interface FiltrosReportesStocks {
+  sucursal: string;
+  departamento: string;
+  producto: string;
+  stock_minimo: number;
+}
