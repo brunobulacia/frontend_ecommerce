@@ -35,7 +35,6 @@ interface CartState {
   total: number;
   couponApplied: boolean;
   couponDiscount: number;
-  couponCode: string;
 }
 
 interface CartActions {
@@ -133,7 +132,6 @@ export const useCartStore = create(
           items: [],
           couponApplied: false,
           couponDiscount: 0,
-          couponCode: "",
         });
         get().calculateTotals();
       },
@@ -150,7 +148,6 @@ export const useCartStore = create(
           set({
             couponApplied: true,
             couponDiscount: validCoupons[code.toLowerCase()],
-            couponCode: code.toLowerCase(),
           });
           get().calculateTotals();
           return true;
@@ -163,7 +160,6 @@ export const useCartStore = create(
         set({
           couponApplied: false,
           couponDiscount: 0,
-          couponCode: "",
         });
         get().calculateTotals();
       },

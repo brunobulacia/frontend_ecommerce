@@ -31,11 +31,6 @@ export function ProfileSidebar() {
       label: "Pedidos",
       icon: Package,
     },
-    {
-      to: "/profile/payment",
-      label: "Metodos de pago",
-      icon: CreditCard,
-    },
   ];
 
   return (

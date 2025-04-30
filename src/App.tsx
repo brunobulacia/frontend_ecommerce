@@ -17,6 +17,8 @@ import ABMProductos from "./pages/Admin/Productos/ABMProductos.tsx";
 import ABMUsuarios from "./pages/Admin/Usuarios/ABMUsuarios.tsx";
 import ABMPedidos from "./pages/Admin/Ordenes/ABMPedidos.tsx";
 import ABMSucursalesStock from "./pages/Admin/SucursalesStock/ABMSucursalesStock.tsx";
+import ABMSucursales from "./pages/Admin/Sucursales/ABMSucursales.tsx";
+
 //APP
 const App = () => {
   const isAuth = useAuthStore((state) => state.isAuth);
@@ -45,6 +47,7 @@ const App = () => {
               <Route path="/admin/categorias" element={<ABMCategorias />} />
               <Route path="/admin/pedidos" element={<ABMPedidos />} />
               <Route path="/admin/stocks" element={<ABMSucursalesStock />} />
+              <Route path="/admin/sucursales" element={<ABMSucursales />} />
             </Route>
           </Route>
         </Routes>

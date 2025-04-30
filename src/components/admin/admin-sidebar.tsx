@@ -11,19 +11,28 @@ import {
   MapPinHouse,
   LogOut,
   ChevronRight,
+  ChartNoAxesCombined,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
-
+import { updateCarrito, cerrarCarrito } from "@/api/carrito";
 export function AdminSidebar() {
   const pathname = usePathname();
   const logOut = useAuthStore((state) => state.logout);
-
+  const { profile } = useAuthStore.getState();
+  const { id_cart } = useAuthStore.getState();
   const isActive = (path: string) => {
     return pathname === path;
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logOut();
+    const data: cerrarCarrito = {
+      carrito: id_cart,
+      estado: "confirmado",
+      usuario: profile.id,
+    };
+
+    const res = await updateCarrito(data);
   };
 
   const navItems = [
@@ -48,8 +57,13 @@ export function AdminSidebar() {
       icon: Tag,
     },
     {
-      title: "Sucursales y Stock",
+      title: "Stocks",
       to: "/admin/stocks",
+      icon: ChartNoAxesCombined,
+    },
+    {
+      title: "Sucursales",
+      to: "/admin/sucursales",
       icon: MapPinHouse,
     },
   ];

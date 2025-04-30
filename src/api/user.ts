@@ -5,7 +5,7 @@ export interface Usuarios {
   last_login: string;
   nombre: string;
   apellidos: string;
-  rol: string;
+  rol: number;
   correo: string;
 }
 

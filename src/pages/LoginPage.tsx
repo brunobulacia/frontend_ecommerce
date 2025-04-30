@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { EyeIcon, EyeOffIcon, LockIcon, Package, UserIcon } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { getDireccionId } from "@/api/direccion";
+import { createCarrito, crearCarrito } from "@/api/carrito";
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -93,12 +94,19 @@ export function LoginPage() {
       useAuthStore.setState({ directions });
       useAuthStore.setState({ profile });
 
+      const data: crearCarrito = {
+        usuario: resLogin.data.user.id,
+        estado: "activo",
+      };
+      const resCarrito = await createCarrito(data);
+      console.log(resCarrito.data);
+
+      useAuthStore.setState({ id_cart: resCarrito.data.id });
+
+      console.log(useAuthStore.getState().id_cart);
+
       navigate("/inicio");
     } catch (error) {
-      /* setError(
-        (error as any)?.response?.data?.message ||
-          "An unexpected error occurred"
-      ); */
       console.error("Login failed:", error);
     } finally {
       setIsLoading(false);

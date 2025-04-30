@@ -26,6 +26,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { registerRequest } from "@/api/auth.ts";
 import { createUser, UserProfile } from "@/types/user.ts";
 import { useAuthStore } from "@/store/auth.ts";
+import { createCarrito, crearCarrito } from "@/api/carrito";
 
 // Esquema de validación con zod
 const registerSchema = z.object({
@@ -80,6 +81,7 @@ export function RegisterPage() {
         apellidos: data.apellidos,
         correo: data.correo,
         password: data.password,
+        rol: 3,
       };
 
       const response = await registerRequest(user);
@@ -92,6 +94,14 @@ export function RegisterPage() {
         rol: response.data.usuario.rol,
       } as UserProfile);
       setToken(response.data.token);
+
+      const carrito: crearCarrito = {
+        usuario: response.data.usuario.id,
+        estado: "activo",
+      };
+      const resCarrito = await createCarrito(carrito);
+
+      useAuthStore.setState({ id_cart: resCarrito.data.id });
 
       navigate("/inicio");
     } catch (error) {

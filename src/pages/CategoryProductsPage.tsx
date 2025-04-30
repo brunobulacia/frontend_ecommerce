@@ -9,7 +9,8 @@ import ReactPaginate from "react-paginate";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
-
+import { useAuthStore } from "@/store/auth";
+import { addItem as addItemApi, addItemCart } from "@/api/carrito";
 // Definición de tipos
 interface ProductCategory {
   nombre: string;
@@ -41,8 +42,17 @@ const ProductCard = ({ product }: { product: Product }) => {
     ? product.detalle.precio -
       product.detalle.precio * ((product.descuento ?? 0) / 100)
     : product.detalle.precio;
+  const { id_cart } = useAuthStore();
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const res = await addItemApi({
+      producto: product.id,
+      cantidad: 1,
+      cart: id_cart,
+    });
+
+    product.id = res.data.id;
+    console.log(product.id);
     addItem(product, 1);
     alert(`${product.nombre} ha sido añadido a tu carrito.`);
   };

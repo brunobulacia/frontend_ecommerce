@@ -86,7 +86,14 @@ export default function ABMUsuarios() {
     columnHelper.accessor("rol", {
       header: "Rol",
       cell: (info) => {
-        const roleText = info.getValue();
+        const roleValue = info.getValue();
+        const roleText =
+          roleValue === 1
+            ? "Administrador"
+            : roleValue === 2
+            ? "Delivery"
+            : "Cliente";
+
         return (
           <Badge
             className={
@@ -421,16 +428,16 @@ export function DialogCrearUsuario({ onClose }: DialogCrearProps) {
               Rol
             </Label>
             <Select
-              onValueChange={(value) => setValue("rol", value)}
-              defaultValue={watchRol}
+              onValueChange={(value) => setValue("rol", parseInt(value))}
+              defaultValue={watchRol?.toString()}
             >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500">
                 <SelectValue placeholder="Seleccione un rol" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                <SelectItem value="Administrador">Administrador</SelectItem>
-                <SelectItem value="Delivery">Delivery</SelectItem>
-                <SelectItem value="Cliente">Cliente</SelectItem>
+                <SelectItem value="1">Administrador</SelectItem>
+                <SelectItem value="2">Delivery</SelectItem>
+                <SelectItem value="3">Cliente</SelectItem>
               </SelectContent>
             </Select>
             <input
@@ -535,16 +542,16 @@ export function EditUsuarioDialog({ usuario, onClose }: DialogEditProps) {
               Rol
             </Label>
             <Select
-              onValueChange={(value) => setValue("rol", value)}
-              defaultValue={watchRol}
+              onValueChange={(value) => setValue("rol", parseInt(value))}
+              defaultValue={watchRol?.toString()}
             >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white focus:ring-slate-500">
                 <SelectValue placeholder="Seleccione un rol" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700 text-slate-200">
-                <SelectItem value="Administrador">Administrador</SelectItem>
-                <SelectItem value="Delivery">Delivery</SelectItem>
-                <SelectItem value="Cliente">Cliente</SelectItem>
+                <SelectItem value="1">Administrador</SelectItem>
+                <SelectItem value="2">Delivery</SelectItem>
+                <SelectItem value="3">Cliente</SelectItem>
               </SelectContent>
             </Select>
             <input

@@ -25,7 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileSidebar } from "@/components/profile-sidebar.tsx";
 import { UserCircle, Mail } from "lucide-react";
 import { useAuthStore } from "@/store/auth.ts";
-// import { updateUsuario, Usuarios } from "@/api/user";
+import { updateUsuario, Usuarios } from "@/api/user";
 import { crearDireccion } from "@/api/direccion";
 import { Direccion } from "@/types/direccion";
 import { toast } from "sonner";
@@ -64,15 +64,22 @@ export function ProfilePage() {
 
   const onProfileSubmit = async (values: z.infer<typeof profileFormSchema>) => {
     setIsSubmitting(true);
-
     try {
-      const updatedUser = {
+      const updatedUser: Partial<Usuarios> = {
         nombre: values.nombre || profile.nombre,
         apellidos: values.apellidos || profile.apellidos,
         correo: values.correo || profile.correo,
+        rol:
+          profile.rol == 1
+            ? "Administrador"
+            : profile.rol == 2
+            ? "Delivery"
+            : "Cliente",
       };
-
       console.log(updatedUser);
+      const res = await updateUsuario(profile.id, updatedUser);
+      console.log(res.data);
+      useAuthStore.setState({ profile: res.data });
       setIsSubmitting(false);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -102,8 +109,7 @@ export function ProfilePage() {
       useAuthStore.setState({ directions: res.data });
       if (res) {
         toast("Direccion actualizada.");
-        alert("Direccion actualizada.");
-        window.location.reload();
+        // window.location.reload();
       }
     } catch (error) {
       console.error("Error updating address:", error);

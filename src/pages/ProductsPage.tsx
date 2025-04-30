@@ -8,6 +8,8 @@ import { getProducts } from "@/api/products";
 import ReactPaginate from "react-paginate";
 import { useCartStore } from "@/store/cart";
 import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/auth";
+import { addItem as addItemApi, addItemCart } from "@/api/carrito";
 
 // Definición de tipos
 interface ProductCategory {
@@ -35,14 +37,26 @@ interface Product {
 // Componente de tarjeta de producto individual
 const ProductCard = ({ product }: { product: Product }) => {
   const { addItem } = useCartStore();
+  const { id_cart } = useAuthStore();
   const hasDiscount = product.descuento && product.descuento > 0;
   const discountedPrice = hasDiscount
     ? product.detalle.precio -
       product.detalle.precio * ((product.descuento ?? 0) / 100)
     : product.detalle.precio;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    const res = await addItemApi({
+      producto: product.id,
+      cantidad: 1,
+      cart: id_cart,
+    });
+
+    // product.id = res.data.id;
+    product.id = res.data.id;
+    console.log(res.data);
+
     addItem(product, 1);
+
     alert(`${product.nombre} ha sido añadido a tu carrito.`);
   };
 

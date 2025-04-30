@@ -31,13 +31,26 @@ import { Link } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
 import { getCategories } from "@/api/categories";
 import { Categorie } from "@/types/categories";
+import { updateCarrito, cerrarCarrito } from "@/api/carrito";
 
 export default function Navbar() {
   const pathname = usePathname();
   const logOut = useAuthStore((state) => state.logout);
   const rol = useAuthStore((state) => state.profile.rol);
-  const handleLogout = () => {
+  const { profile } = useAuthStore.getState();
+  const { id_cart } = useAuthStore.getState();
+
+  const handleLogout = async () => {
     logOut();
+
+    const data: cerrarCarrito = {
+      carrito: id_cart,
+      estado: "confirmado",
+      usuario: profile.id,
+    };
+
+    const res = await updateCarrito(data);
+    console.log(res);
   };
   const isActive = (path: string) => {
     return pathname === path;

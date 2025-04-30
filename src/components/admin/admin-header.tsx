@@ -20,14 +20,18 @@ import {
   Users,
   Tag,
   ChevronRight,
+  ChartNoAxesCombined,
+  MapPinHouse,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { updateCarrito } from "@/api/carrito";
 
 export function AdminHeader() {
   const logOut = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
     logOut();
+    updateCarrito();
   };
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-slate-700 bg-slate-800 px-6">
@@ -94,6 +98,26 @@ export function AdminHeader() {
               <Link to="/admin/categorias">
                 <Tag className="mr-2 h-4 w-4" />
                 Categorias
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-700"
+              asChild
+            >
+              <Link to="/admin/stock">
+                <ChartNoAxesCombined className="mr-2 h-4 w-4" />
+                Stocks
+              </Link>
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start text-slate-400 hover:text-white hover:bg-slate-700"
+              asChild
+            >
+              <Link to="/admin/sucursales">
+                <MapPinHouse className="mr-2 h-4 w-4" />
+                Sucursales
               </Link>
             </Button>
           </div>

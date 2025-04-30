@@ -3,6 +3,7 @@ export interface createUser {
   password: string;
   apellidos: string;
   correo: string;
+  rol: number;
 }
 
 export interface UserLogin {
